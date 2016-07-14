@@ -28,49 +28,71 @@ public class BaseActivity extends Activity {
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_UP) {
             //1.递归遍历Activity（就是Context）中的所有View，找出被点击的View
-            View clickView = searchClickView(this.getWindow().getDecorView(), ev);
+            View rootView = this.getWindow().getDecorView();
+            String viewTree = rootView.getClass().getSimpleName() + "[" + 0 + "]";
+            MyView myView = new MyView(rootView, viewTree);
+            myView = searchClickView(myView, ev);
             //2.生成log记录下来
-            writeLog(clickView);
+            writeLog(myView);
         }
         return super.dispatchTouchEvent(ev);
     }
 
     /**
-     * @param clickView 点击的控件
+     * @param myView 点击的控件
      */
-    private void writeLog(View clickView) {
-        if (clickView == null) {
+    private void writeLog(MyView myView) {
+        if (myView == null) {
             return;
         }
+        View clickView = myView.view;
+
         Object tag = clickView.getTag();
-        if (tag == null) {
-            return;
+        Log.i(TAG, this.getClass().getSimpleName() + "：" + myView.viewTree);
+
+        if (tag != null) {
+            Log.w(TAG, "tag：" + tag.toString());
         }
-        Log.e(TAG, "tag：" + tag.toString());
 
     }
 
-    private View searchClickView(View view, MotionEvent event) {
-        View clickView = null;
+    /**
+     * 查找点击的View
+     *
+     * @param myView 顶层布局view
+     * @param event  事件
+     * @return 点击的view
+     */
+    private MyView searchClickView(MyView myView, MotionEvent event) {
+        MyView clickView = null;
+        View view = myView.view;
+        String viewTree = myView.viewTree;
         if (isInView(view, event) &&
                 view.getVisibility() == View.VISIBLE) {  //这里一定要判断View是可见的
+
             if (view instanceof ViewGroup) {    //遇到一些Layout之类的ViewGroup，继续遍历它下面的子View
                 ViewGroup group = (ViewGroup) view;
+                if (group.getTag() != null) { // 如果Layout有设置特定的tag，则直接返回Layout
+                    return myView;
+                }
                 int childCount = group.getChildCount();
                 for (int i = childCount - 1; i >= 0; i--) {
                     View childView = group.getChildAt(i);
-                    clickView = searchClickView(childView, event);
+                    viewTree = viewTree + "->" + childView.getClass().getSimpleName() + "[" + i + "]";
+                    myView.view = childView;
+                    myView.viewTree = viewTree;
+                    clickView = searchClickView(myView, event);
                     if (clickView != null) {
                         return clickView;
                     }
                 }
             }
-            clickView = view;
+            clickView = myView;
         }
         return clickView;
     }
 
-    public boolean isInView(View view, MotionEvent event) {
+    private boolean isInView(View view, MotionEvent event) {
         if (view.getVisibility() == View.INVISIBLE || view.getVisibility() == View.GONE) {
             return false;
         }
@@ -82,72 +104,79 @@ public class BaseActivity extends Activity {
         int y = location[1];
         int width = view.getWidth();
         int height = view.getHeight();
-        if (clickX > x && clickX < (x + width) &&
-                clickY > y && clickY < (y + height)) {
-            return true;
-        }
-        return false;
+        return clickX > x && clickX < (x + width) && clickY > y && clickY < (y + height);
     }
 
-    public View.OnClickListener getOnClickListener(View view) {
-        if (view == null) {
-            return null;
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            return getOnClickListenerV14(view);
-        } else {
-            return getOnClickListenerV(view);
+    public class MyView {
+
+        View view;
+        String viewTree;
+
+        public MyView(View view, String viewTree) {
+            this.view = view;
+            this.viewTree = viewTree;
         }
     }
+
+//    private View.OnClickListener getOnClickListener(View view) {
+//        if (view == null) {
+//            return null;
+//        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+//            return getOnClickListenerV14(view);
+//        } else {
+//            return getOnClickListenerV(view);
+//        }
+//    }
 
     //Used for APIs lower than ICS (API 14)
-    private View.OnClickListener getOnClickListenerV(View view) {
-        View.OnClickListener retrievedListener = null;
-        String viewStr = "android.view.View";
-        Field field;
-
-        try {
-            field = Class.forName(viewStr).getDeclaredField("mOnClickListener");
-            retrievedListener = (View.OnClickListener) field.get(view);
-        } catch (NoSuchFieldException ex) {
-            Log.e("Reflection", "No Such Field.");
-        } catch (IllegalAccessException ex) {
-            Log.e("Reflection", "Illegal Access.");
-        } catch (ClassNotFoundException ex) {
-            Log.e("Reflection", "Class Not Found.");
-        }
-
-        return retrievedListener;
-    }
+//    private View.OnClickListener getOnClickListenerV(View view) {
+//        View.OnClickListener retrievedListener = null;
+//        String viewStr = "android.view.View";
+//        Field field;
+//
+//        try {
+//            field = Class.forName(viewStr).getDeclaredField("mOnClickListener");
+//            retrievedListener = (View.OnClickListener) field.get(view);
+//        } catch (NoSuchFieldException ex) {
+//            Log.e("Reflection", "No Such Field.");
+//        } catch (IllegalAccessException ex) {
+//            Log.e("Reflection", "Illegal Access.");
+//        } catch (ClassNotFoundException ex) {
+//            Log.e("Reflection", "Class Not Found.");
+//        }
+//
+//        return retrievedListener;
+//    }
 
     //Used for new ListenerInfo class structure used beginning with API 14 (ICS)
-    private View.OnClickListener getOnClickListenerV14(View view) {
-        View.OnClickListener retrievedListener = null;
-        String viewStr = "android.view.View";
-        String lInfoStr = "android.view.View$ListenerInfo";
-
-        try {
-            Field listenerField = Class.forName(viewStr).getDeclaredField("mListenerInfo");
-            Object listenerInfo = null;
-
-            if (listenerField != null) {
-                listenerField.setAccessible(true);
-                listenerInfo = listenerField.get(view);
-            }
-
-            Field clickListenerField = Class.forName(lInfoStr).getDeclaredField("mOnClickListener");
-
-            if (clickListenerField != null && listenerInfo != null) {
-                retrievedListener = (View.OnClickListener) clickListenerField.get(listenerInfo);
-            }
-        } catch (NoSuchFieldException ex) {
-            Log.e("Reflection", "No Such Field.");
-        } catch (IllegalAccessException ex) {
-            Log.e("Reflection", "Illegal Access.");
-        } catch (ClassNotFoundException ex) {
-            Log.e("Reflection", "Class Not Found.");
-        }
-
-        return retrievedListener;
-    }
+//    private View.OnClickListener getOnClickListenerV14(View view) {
+//        View.OnClickListener retrievedListener = null;
+//        String viewStr = "android.view.View";
+//        String lInfoStr = "android.view.View$ListenerInfo";
+//
+//        try {
+//            Field listenerField = Class.forName(viewStr).getDeclaredField("mListenerInfo");
+//            Object listenerInfo = null;
+//
+//            if (listenerField != null) {
+//                listenerField.setAccessible(true);
+//                listenerInfo = listenerField.get(view);
+//            }
+//
+//            Field clickListenerField = Class.forName(lInfoStr).getDeclaredField("mOnClickListener");
+//
+//            if (clickListenerField != null && listenerInfo != null) {
+//                retrievedListener = (View.OnClickListener) clickListenerField.get(listenerInfo);
+//            }
+//        } catch (NoSuchFieldException ex) {
+//            Log.e("Reflection", "No Such Field.");
+//        } catch (IllegalAccessException ex) {
+//            Log.e("Reflection", "Illegal Access.");
+//        } catch (ClassNotFoundException ex) {
+//            Log.e("Reflection", "Class Not Found.");
+//        }
+//
+//        return retrievedListener;
+//    }
 }
