@@ -1,21 +1,19 @@
 package com.hzj.eventcollection;
 
-import android.app.Activity;
-import android.os.Build;
+import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.lang.reflect.Field;
 
 /**
  * 控件埋点的基类
  * <p/>
  * Created by hzj on 2016/7/10.
  */
-public class BaseActivity extends Activity {
+public class BaseActivity extends FragmentActivity {
 
     private final String TAG = this.getClass().getSimpleName();
 
