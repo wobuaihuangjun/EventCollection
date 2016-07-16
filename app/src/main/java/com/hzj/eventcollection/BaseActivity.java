@@ -44,14 +44,18 @@ public class BaseActivity extends FragmentActivity {
             return;
         }
         View clickView = myView.view;
-
+        if (clickView == null) {
+            return;
+        }
         Object tag = clickView.getTag();
-        Log.i(TAG, myView.viewTree);
-
+        if (clickView instanceof ViewGroup && tag == null) {
+            // 没有设置tag的layout不收集
+            return;
+        }
         if (tag != null) {
             Log.w(TAG, "tag：" + tag.toString());
         }
-
+        Log.i(TAG, myView.viewTree);
     }
 
     /**
@@ -73,7 +77,6 @@ public class BaseActivity extends FragmentActivity {
             if (view instanceof ViewGroup) {    //遇到一些Layout之类的ViewGroup，继续遍历它下面的子View
                 ViewGroup group = (ViewGroup) view;
                 int childCount = group.getChildCount();
-
                 for (int i = childCount - 1; i >= 0; i--) {
                     myView.view = group.getChildAt(i);
                     clickView = searchClickView(myView, event, i);
