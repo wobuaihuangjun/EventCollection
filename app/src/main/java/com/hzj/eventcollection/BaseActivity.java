@@ -27,9 +27,9 @@ public class BaseActivity extends FragmentActivity {
         if (ev.getAction() == MotionEvent.ACTION_UP) {
             //1.递归遍历Activity（就是Context）中的所有View，找出被点击的View
             View rootView = this.getWindow().getDecorView();
-            String viewTree = rootView.getClass().getSimpleName() + "[" + 0 + "]";
+            String viewTree = this.getClass().getSimpleName() + "：";
             MyView myView = new MyView(rootView, viewTree);
-            myView = searchClickView(myView, ev);
+            myView = searchClickView(myView, ev, 0);
             //2.生成log记录下来
             writeLog(myView);
         }
@@ -46,7 +46,7 @@ public class BaseActivity extends FragmentActivity {
         View clickView = myView.view;
 
         Object tag = clickView.getTag();
-        Log.i(TAG, this.getClass().getSimpleName() + "：" + myView.viewTree);
+        Log.i(TAG, myView.viewTree);
 
         if (tag != null) {
             Log.w(TAG, "tag：" + tag.toString());
@@ -61,25 +61,22 @@ public class BaseActivity extends FragmentActivity {
      * @param event  事件
      * @return 点击的view
      */
-    private MyView searchClickView(MyView myView, MotionEvent event) {
+    private MyView searchClickView(MyView myView, MotionEvent event, int index) {
         MyView clickView = null;
         View view = myView.view;
-        String viewTree = myView.viewTree;
-        if (isInView(view, event) &&
+        if (view != null && isInView(view, event) &&
                 view.getVisibility() == View.VISIBLE) {  //这里一定要判断View是可见的
-
+            myView.viewTree = myView.viewTree + "->" + view.getClass().getSimpleName() + "[" + index + "]";
+            if (view.getTag() != null) { // 如果Layout有设置特定的tag，则直接返回View，主要用于复合组件的点击事件
+                return myView;
+            }
             if (view instanceof ViewGroup) {    //遇到一些Layout之类的ViewGroup，继续遍历它下面的子View
                 ViewGroup group = (ViewGroup) view;
-                if (group.getTag() != null) { // 如果Layout有设置特定的tag，则直接返回Layout
-                    return myView;
-                }
                 int childCount = group.getChildCount();
+
                 for (int i = childCount - 1; i >= 0; i--) {
-                    View childView = group.getChildAt(i);
-                    viewTree = viewTree + "->" + childView.getClass().getSimpleName() + "[" + i + "]";
-                    myView.view = childView;
-                    myView.viewTree = viewTree;
-                    clickView = searchClickView(myView, event);
+                    myView.view = group.getChildAt(i);
+                    clickView = searchClickView(myView, event, i);
                     if (clickView != null) {
                         return clickView;
                     }
