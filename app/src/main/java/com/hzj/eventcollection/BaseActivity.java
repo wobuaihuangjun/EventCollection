@@ -102,7 +102,7 @@ public class BaseActivity extends FragmentActivity {
         return clickX > x && clickX < (x + width) && clickY > y && clickY < (y + height);
     }
 
-    public class MyView {
+    private class MyView {
 
         View view;
         String viewTree;
