@@ -48,10 +48,6 @@ public class BaseActivity extends FragmentActivity {
             return;
         }
         Object tag = clickView.getTag();
-        if (clickView instanceof ViewGroup && tag == null) {
-            // 没有设置tag的layout不收集
-            return;
-        }
         if (tag != null) {
             Log.w(TAG, "tag：" + tag.toString());
         }
@@ -85,7 +81,7 @@ public class BaseActivity extends FragmentActivity {
                     }
                 }
             }
-            clickView = myView;
+//            clickView = myView;  // 没有设置tag的layout不收集
         }
         return clickView;
     }

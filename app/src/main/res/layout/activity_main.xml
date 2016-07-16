@@ -8,7 +8,7 @@
         android:id="@+id/linear_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:tag="linear_layout">
+        android:tag="click_event">
 
         <ImageView
             android:id="@+id/image_view"
@@ -34,5 +34,10 @@
         android:layout_height="wrap_content"
         android:tag="button_b"
         android:text="B" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:background="#cc3aa3"
+        android:layout_height="20dp" />
 
 </LinearLayout>
