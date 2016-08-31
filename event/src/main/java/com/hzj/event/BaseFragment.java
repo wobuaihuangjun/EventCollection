@@ -1,4 +1,4 @@
-package com.hzj.eventcollection;
+package com.hzj.event;
 
 import android.support.v4.app.Fragment;
 

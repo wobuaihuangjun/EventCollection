@@ -1,8 +1,11 @@
-package com.hzj.eventcollection;
+package com.hzj.eventcollection.demo;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+
+import com.hzj.event.BaseActivity;
+import com.hzj.eventcollection.R;
 
 public class MainActivity extends BaseActivity {
 

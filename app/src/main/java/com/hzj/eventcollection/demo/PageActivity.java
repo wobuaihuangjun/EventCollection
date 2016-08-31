@@ -1,7 +1,10 @@
-package com.hzj.eventcollection;
+package com.hzj.eventcollection.demo;
 
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+
+import com.hzj.event.BaseActivity;
+import com.hzj.eventcollection.R;
 
 public class PageActivity extends BaseActivity {
 

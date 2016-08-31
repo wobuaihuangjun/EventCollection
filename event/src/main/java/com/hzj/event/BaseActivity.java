@@ -1,12 +1,15 @@
-package com.hzj.eventcollection;
+package com.hzj.event;
 
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
+import com.hzj.event.util.BehaviorUtil;
+import com.hzj.event.util.MD5Util;
 
 /**
  * 控件埋点的基类
@@ -17,6 +20,11 @@ public class BaseActivity extends FragmentActivity {
 
     private final String TAG = this.getClass().getSimpleName();
 
+    /**
+     * 按下时点中的控件
+     */
+    private MyView downView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,34 +33,42 @@ public class BaseActivity extends FragmentActivity {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (ev.getAction() == MotionEvent.ACTION_UP) {
-            //1.递归遍历Activity（就是Context）中的所有View，找出被点击的View
-            View rootView = this.getWindow().getDecorView();
-            String viewTree = this.getClass().getSimpleName() + "：";
-            MyView myView = new MyView(rootView, viewTree);
-            myView = searchClickView(myView, ev, 0);
-            //2.生成log记录下来
-            writeLog(myView);
+            if (downView != null) {
+                MyView myView = findClickView(ev);
+
+                // 自动统计所有控件的点击事件
+                if (myView != null && downView.view == myView.view) {
+                    String funcName = MD5Util.md5(myView.viewTree);
+                    BehaviorUtil.clickEvent(funcName);
+                    if (BehaviorUtil.isToastAutoCollectEvent()) {
+                        Toast.makeText(this, funcName, Toast.LENGTH_SHORT).show();
+                        Log.i(TAG, "bigdata-->funcName = " + funcName + ", viewTree = " + myView.viewTree);
+                    }
+                }
+                downView = null;
+            }
+
+        } else if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            downView = findClickView(ev);
         }
+
         return super.dispatchTouchEvent(ev);
     }
 
     /**
-     * @param myView 点击的控件
+     * 查找点中的视图
+     *
+     * @param ev
+     * @return
      */
-    private void writeLog(MyView myView) {
-        if (myView == null) {
-            return;
-        }
-        View clickView = myView.view;
-        if (clickView == null) {
-            return;
-        }
-        Object tag = clickView.getTag();
-        if (tag != null) {
-            Log.w(TAG, "tag：" + tag.toString());
-        }
-        Log.i(TAG, myView.viewTree);
+    private MyView findClickView(MotionEvent ev) {
+        View rootView = this.getWindow().getDecorView();
+        // 控件在视图树上的路径,暂时不使用
+        String viewTree = this.getPackageName() + "." + this.getClass().getSimpleName();
+        MyView myView = new MyView(rootView, viewTree);
+        return searchClickView(myView, ev, 0);
     }
+
 
     /**
      * 查找点击的View
@@ -64,12 +80,27 @@ public class BaseActivity extends FragmentActivity {
     private MyView searchClickView(MyView myView, MotionEvent event, int index) {
         MyView clickView = null;
         View view = myView.view;
-        if (view != null && isInView(view, event) &&
-                view.getVisibility() == View.VISIBLE) {  //这里一定要判断View是可见的
-            myView.viewTree = myView.viewTree + "->" + view.getClass().getSimpleName() + "[" + index + "]";
-            if (view.getTag() != null) { // 如果Layout有设置特定的tag，则直接返回View，主要用于复合组件的点击事件
-                return myView;
+        if (view != null && isInView(view, event) && view.getVisibility() == View.VISIBLE) {
+            // 当第二层不为LinearLayout时，说明系统进行了改造，多了一层,需要多剔除一层
+            myView.level++;
+            if (myView.level == 2 && !"LinearLayout".equals(view.getClass().getSimpleName())) {
+                myView.filterLevelCount++;
             }
+            if (myView.level > myView.filterLevelCount) {
+                myView.viewTree = myView.viewTree + "." + view.getClass().getSimpleName() + "[" + index + "]";
+            }
+
+            // 如果Layout有设置特定的tag，则直接返回View，主要用于复合组件的点击事件
+            if (view.getTag() != null) {
+                // 主动标记不需要统计时，不进行自动统计
+                String tag = view.getTag().toString();
+                if (tag.startsWith("bigdata_") && !"bigdata_ignore".equals(tag)) {
+                    return myView;
+                } else {
+                    return null;
+                }
+            }
+
             if (view instanceof ViewGroup) {    //遇到一些Layout之类的ViewGroup，继续遍历它下面的子View
                 ViewGroup group = (ViewGroup) view;
                 int childCount = group.getChildCount();
@@ -80,8 +111,9 @@ public class BaseActivity extends FragmentActivity {
                         return clickView;
                     }
                 }
+            } else {
+                clickView = myView;
             }
-//            clickView = myView;  // 没有设置tag的layout不收集
         }
         return clickView;
     }
@@ -101,10 +133,12 @@ public class BaseActivity extends FragmentActivity {
         return clickX > x && clickX < (x + width) && clickY > y && clickY < (y + height);
     }
 
-    private class MyView {
+    private static class MyView {
 
-        View view;
-        String viewTree;
+        public View view;
+        public String viewTree;
+        public int level = 0;
+        public int filterLevelCount = 3;
 
         public MyView(View view, String viewTree) {
             this.view = view;
