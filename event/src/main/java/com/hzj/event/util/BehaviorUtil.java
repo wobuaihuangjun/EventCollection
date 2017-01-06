@@ -15,6 +15,11 @@ public class BehaviorUtil {
     private static boolean isToast;
 
     /**
+     * 是否自动埋点
+     */
+    private static boolean isAutoCollectEvent;
+
+    /**
      * 是否显示自动统计事件名称
      *
      * @return
@@ -41,4 +46,18 @@ public class BehaviorUtil {
         Log.d(TAG, "click event :" + functionName);
     }
 
+
+    /**
+     * 是否自动埋点
+     */
+    public static boolean isAutoCollectEvent() {
+        return isAutoCollectEvent;
+    }
+
+    /**
+     * 设置是否自动埋点
+     */
+    public static void setAutoCollectEvent(boolean isAutoCollectEvent) {
+        BehaviorUtil.isAutoCollectEvent = isAutoCollectEvent;
+    }
 }

@@ -5,38 +5,41 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:id="@+id/linear_layout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:tag="click_event">
+        android:tag="big_data">
 
         <ImageView
-            android:id="@+id/image_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_launcher"
-            android:tag="image_view" />
+            android:src="@mipmap/ic_launcher" />
 
     </LinearLayout>
 
 
-    <Button
-        android:id="@+id/button_a"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:onClick="onClickA"
-        android:tag="button_a"
-        android:text="A" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <Button
-        android:id="@+id/button_b"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="B" />
+        <Button
+            android:id="@+id/button_a"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onClickA"
+            android:text="A" />
+
+    </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
+        android:layout_height="20dp"
         android:background="#cc3aa3"
-        android:layout_height="20dp" />
+        android:tag="bigdata_relative_click" />
+
+    <com.hzj.eventcollection.demo.MessageRemindView
+        android:id="@+id/mrv_homepage_main_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" />
 
 </LinearLayout>

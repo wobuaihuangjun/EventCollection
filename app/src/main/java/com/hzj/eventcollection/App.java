@@ -2,7 +2,7 @@ package com.hzj.eventcollection;
 
 import android.app.Application;
 
-import com.hzj.eventcollection.util.BehaviorUtil;
+import com.hzj.event.util.BehaviorUtil;
 
 /**
  * Created by hzj on 2016/8/31.
@@ -14,5 +14,6 @@ public class App extends Application {
         super.onCreate();
 
         BehaviorUtil.setToastAutoCollectEvent(true);
+        BehaviorUtil.setAutoCollectEvent(true);
     }
 }
