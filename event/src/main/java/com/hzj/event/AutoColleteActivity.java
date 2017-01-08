@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.Toast;
 
 import com.hzj.event.util.BehaviorUtil;
@@ -32,6 +33,7 @@ public class AutoColleteActivity extends FragmentActivity {
 
     private String bigDataPrefix;
     private String bigDataIngorePrefix;
+    private String bigDataEventPrefix;
 
     @Override
     public void onAttachedToWindow() {
@@ -42,6 +44,7 @@ public class AutoColleteActivity extends FragmentActivity {
         rootViewTree = getPackageName() + "." + getClass().getSimpleName();
         bigDataPrefix = getString(R.string.collection_tag);
         bigDataIngorePrefix = getString(R.string.collection_ignore_tag);
+        bigDataEventPrefix = getString(R.string.collection_event_prefix);
     }
 
     @Override
@@ -122,12 +125,19 @@ public class AutoColleteActivity extends FragmentActivity {
                 if (tag.startsWith(bigDataIngorePrefix)) {
                     return null;
                 } else if (tag.startsWith(bigDataPrefix)) {
-                    myView.specifyTag = tag.replace(bigDataPrefix + "_", "");
+                    if (tag.startsWith(bigDataEventPrefix)) {
+                        myView.specifyTag = tag.replace(bigDataEventPrefix, "");
+                    }
                     return myView;
                 }
             }
 
             if (view instanceof ViewGroup) {    //遇到一些Layout之类的ViewGroup，继续遍历它下面的子View
+                if (view instanceof AbsListView) {
+                    Log.i(TAG, "bigdata-->AbsListView ");
+                    return null;
+                }
+
                 ViewGroup group = (ViewGroup) view;
                 int childCount = group.getChildCount();
 

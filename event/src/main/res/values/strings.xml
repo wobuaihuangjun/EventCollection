@@ -2,5 +2,6 @@
     <string name="app_name">Event</string>
 
     <string name="collection_tag">bigdata</string>
+    <string name="collection_event_prefix">bigdata_</string>
     <string name="collection_ignore_tag">bigdata_ignore</string>
 </resources>

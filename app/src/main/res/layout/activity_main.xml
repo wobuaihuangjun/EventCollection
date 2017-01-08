@@ -28,6 +28,14 @@
             android:onClick="onClickA"
             android:text="A" />
 
+        <Button
+            android:id="@+id/button_c"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:tag="bigdata_gone"
+            android:text="C"
+            android:visibility="gone" />
+
     </RelativeLayout>
 
     <RelativeLayout
@@ -41,5 +49,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp" />
+
+    <ListView
+        android:id="@+id/list_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
