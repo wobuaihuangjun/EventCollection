@@ -38,7 +38,6 @@ public class AutoColleteActivity extends FragmentActivity {
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
-        Log.i(TAG, "bigdata-->onAttachedToWindow()");
 
         rootView = getWindow().getDecorView();
         rootViewTree = getPackageName() + "." + getClass().getSimpleName();
@@ -93,6 +92,7 @@ public class AutoColleteActivity extends FragmentActivity {
      * 查找点中的视图
      */
     private MyView findClickView(MotionEvent ev) {
+        Log.w(TAG, "bigdata-->findClickView");
         MyView myView = new MyView(rootView, rootViewTree);
         return searchClickView(myView, ev, 0);
     }
@@ -107,7 +107,7 @@ public class AutoColleteActivity extends FragmentActivity {
     private MyView searchClickView(MyView myView, MotionEvent event, int index) {
         MyView clickView = null;
         View view = myView.view;
-        if (view != null && isInView(view, event) && view.getVisibility() == View.VISIBLE) {
+        if (isInView(view, event)) {
             // 当第二层不为LinearLayout时，说明系统进行了改造，多了一层,需要多剔除一层
             myView.level++;
             if (myView.level == 2 && !"LinearLayout".equals(view.getClass().getSimpleName())) {
@@ -116,7 +116,7 @@ public class AutoColleteActivity extends FragmentActivity {
             if (myView.level > myView.filterLevelCount) {
                 myView.viewTree = myView.viewTree + "." + view.getClass().getSimpleName() + "[" + index + "]";
             }
-
+            Log.i(TAG, "bigdata-->tag = " + view.getTag());
             // 如果Layout有设置特定的tag，则直接返回View，主要用于复合组件的点击事件
             if (view.getTag() != null) {
                 // 主动标记不需要统计时，不进行自动统计
@@ -159,7 +159,7 @@ public class AutoColleteActivity extends FragmentActivity {
     }
 
     private boolean isInView(View view, MotionEvent event) {
-        if (view.getVisibility() == View.INVISIBLE || view.getVisibility() == View.GONE) {
+        if (view == null || view.getVisibility() != View.VISIBLE) {
             return false;
         }
         int clickX = (int) event.getRawX();

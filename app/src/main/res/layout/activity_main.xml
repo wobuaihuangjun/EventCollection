@@ -2,12 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:tag="linear_0">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:tag="bigdata">
+        android:tag="bigdata_linear">
 
         <ImageView
             android:layout_width="wrap_content"
@@ -16,25 +17,31 @@
 
     </LinearLayout>
 
-
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:tag="relative_0">
 
         <Button
             android:id="@+id/button_a"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:onClick="onClickA"
+            android:tag="button_a"
             android:text="A" />
 
-        <Button
-            android:id="@+id/button_c"
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:tag="bigdata_gone"
-            android:text="C"
-            android:visibility="gone" />
+            android:layout_height="100dp"
+            android:tag="relative_1">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TextViewC"
+                android:visibility="gone" />
+
+        </RelativeLayout>
 
     </RelativeLayout>
 
@@ -48,11 +55,13 @@
         android:id="@+id/mrv_homepage_main_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        android:tag="message_remind" />
 
     <ListView
         android:id="@+id/list_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:tag="list_view" />
 
 </LinearLayout>
